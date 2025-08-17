@@ -1,4 +1,4 @@
-package repo_mem
+package mem
 
 import (
 	"context"

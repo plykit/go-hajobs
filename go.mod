@@ -1,6 +1,6 @@
 module github.com/plykit/go-hajobs
 
-go 1.24
+go 1.23
 
 require (
 	github.com/gocql/gocql v1.7.0

@@ -65,30 +65,30 @@ const (
 	jobsInfoKind = "jobsInfo"
 )
 
-type jobsRepo struct {
+type JobsRepo struct {
 	jobinfos map[string]*jinfo
 	mutex    sync.Mutex
 }
 
 // verify the client implements the jobs repo for the job manager
-var _ = hajobs.JobsRepo(&jobsRepo{})
+var _ = hajobs.JobsRepo(&JobsRepo{})
 
-func NewJobsRepo() *jobsRepo {
-	return &jobsRepo{
+func NewJobsRepo() *JobsRepo {
+	return &JobsRepo{
 		jobinfos: make(map[string]*jinfo),
 	}
 }
 
 // Get the entry for the job with the given name from the repository. If the
 // job does not exist return nil,nil
-func (r *jobsRepo) get(ctx context.Context, name string) (*jinfo, error) {
+func (r *JobsRepo) get(ctx context.Context, name string) (*jinfo, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	return r.jobinfos[name], nil
 }
 
 // Saves the entry for the given job with the given new jobinfo.
-func (r *jobsRepo) put(ctx context.Context, j *jinfo) error {
+func (r *JobsRepo) put(ctx context.Context, j *jinfo) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.jobinfos[j.Name] = j
@@ -97,7 +97,7 @@ func (r *jobsRepo) put(ctx context.Context, j *jinfo) error {
 
 // Get the entry for the job with the given name from the repository. If the
 // job does not exist return nil,nil
-func (r *jobsRepo) GetJobinfo(ctx context.Context, name string) (*hajobs.JobInfo, error) {
+func (r *JobsRepo) GetJobinfo(ctx context.Context, name string) (*hajobs.JobInfo, error) {
 	j, err := r.get(ctx, name)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (r *jobsRepo) GetJobinfo(ctx context.Context, name string) (*hajobs.JobInfo
 }
 
 // Saves the entry for the given job with the given new jobinfo.
-func (r *jobsRepo) SaveJobinfo(ctx context.Context, job *hajobs.JobInfo) error {
+func (r *JobsRepo) SaveJobinfo(ctx context.Context, job *hajobs.JobInfo) error {
 	j := jinfoFromJobinfo(job)
 	return r.put(ctx, &j)
 }
@@ -115,7 +115,7 @@ func (r *jobsRepo) SaveJobinfo(ctx context.Context, job *hajobs.JobInfo) error {
 // not exist an error is returned. This updates the last-run timestamp of the job
 // so that it can be later on evaluated in the context of the schedule.
 // See also Commit().
-func (r *jobsRepo) SaveState(ctx context.Context, name string, state []byte) error {
+func (r *JobsRepo) SaveState(ctx context.Context, name string, state []byte) error {
 	j, err := r.get(ctx, name)
 	if j == nil || err != nil {
 		return fmt.Errorf("job %s does not exist or something else went wrong while obtaining it %w", name, err)
@@ -132,7 +132,7 @@ func (r *jobsRepo) SaveState(ctx context.Context, name string, state []byte) err
 // not exist an error is returned.
 // Commit only updates the state, but not the last-run timestamp of the job
 // See also Save().
-func (r *jobsRepo) Commit(ctx context.Context, name string, state []byte) error {
+func (r *JobsRepo) Commit(ctx context.Context, name string, state []byte) error {
 	j, err := r.get(ctx, name)
 	if j == nil || err != nil {
 		return fmt.Errorf("job %s does not exist or something else went wrong while obtaining it %w", name, err)
@@ -146,7 +146,7 @@ func (r *jobsRepo) Commit(ctx context.Context, name string, state []byte) error 
 
 // Create or overwrite the job's data in the job repository. Note that this will also
 // reset all state and last-run information.
-func (r *jobsRepo) CreateJob(ctx context.Context, name string, jobcfg hajobs.JobCfg) error {
+func (r *JobsRepo) CreateJob(ctx context.Context, name string, jobcfg hajobs.JobCfg) error {
 	// This is a helper function to deal with unexported fields. This will be improved
 	// but currently the package layout I am not sure about.
 	job, err := hajobs.ToJobInfo(name, jobcfg)

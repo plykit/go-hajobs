@@ -8,22 +8,22 @@ import (
 	"time"
 )
 
-type lockRepo struct {
+type LockRepo struct {
 	mutex     sync.Mutex
 	executors map[string]*data
 }
 
 // verify the client implements the jobs repo for the job manager
-var _ = hajobs.LockRepo(&lockRepo{})
+var _ = hajobs.LockRepo(&LockRepo{})
 
-func NewLockRepo() *lockRepo {
-	return &lockRepo{
+func NewLockRepo() *LockRepo {
+	return &LockRepo{
 		executors: make(map[string]*data),
 	}
 }
 
 type lock struct {
-	r      *lockRepo
+	r      *LockRepo
 	name   string
 	owner  string
 	hbctx  context.Context
@@ -70,7 +70,7 @@ func nextdata(d data) data {
 //     will lead to concurrent runs of the job.
 //
 // The heartbeat will be stopped if the provided context is canceled.
-func (r *lockRepo) Lock(ctx context.Context, name string, owner string, ttl time.Duration) (hajobs.Lock, error, <-chan error) {
+func (r *LockRepo) Lock(ctx context.Context, name string, owner string, ttl time.Duration) (hajobs.Lock, error, <-chan error) {
 	now := time.Now()
 	initialData := newdata(name, owner, now, ttl)
 	applied, err := r.lock(ctx, now, initialData)
@@ -113,7 +113,7 @@ func (r *lockRepo) Lock(ctx context.Context, name string, owner string, ttl time
 
 // Try to akquire the lock and set the initial expiry to now+ttl.
 // returns true if the lock was akquired.
-func (r *lockRepo) lock(ctx context.Context, now time.Time, d data) (bool, error) {
+func (r *LockRepo) lock(ctx context.Context, now time.Time, d data) (bool, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	lck, ok := r.executors[d.Name]
@@ -129,7 +129,7 @@ func (r *lockRepo) lock(ctx context.Context, now time.Time, d data) (bool, error
 }
 
 // Update the locks expiry time using the given TTL.
-func (r *lockRepo) touch(ctx context.Context, d data) (data, error) {
+func (r *LockRepo) touch(ctx context.Context, d data) (data, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	lock, ok := r.executors[d.Name]

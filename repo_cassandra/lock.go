@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gocql/gocql"
-	"github.com/plykit/hajobs"
+	"github.com/plykit/go-hajobs"
 	"log"
 	"time"
 )

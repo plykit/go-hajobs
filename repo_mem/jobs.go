@@ -3,7 +3,7 @@ package repo_mem
 import (
 	"context"
 	"fmt"
-	"github.com/plykit/hajobs"
+	"github.com/plykit/go-hajobs"
 	"sync"
 	"time"
 
